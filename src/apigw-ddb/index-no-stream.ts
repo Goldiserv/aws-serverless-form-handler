@@ -1,18 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-// import * as lambda from 'aws-cdk-lib/aws-lambda';
-// import * as iam from 'aws-cdk-lib/aws-iam';
-// import { DynamoEventSource, DynamoEventSourceProps } from 'aws-cdk-lib/aws-lambda-event-sources';
-// import * as logs from 'aws-cdk-lib/aws-logs';
-// import * as path from 'path';
 import { Construct } from 'constructs';
-import { ApiGatewayToDynamoDBProps, ApiGatewayToDynamoDB } from './aws-apigateway-dynamodb';
+import { ApiGatewayToDynamoDBProps, ApiGatewayToDynamoDB } from '../lib/aws-apigateway-dynamodb';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
 class ApigwDynamoDBStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps, createRowRequestItemTemplate?: any) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps, createRowRequestItemTemplate?: any, createIntegrationResponseStructure?: cdk.aws_apigateway.IntegrationResponse[]) {
     super(scope, id, props);
 
     // Define a DynamoDB table with backup enabled
@@ -28,6 +23,7 @@ class ApigwDynamoDBStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // EDITBEFOREDEPLOY Use with caution in production
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // EDITBEFOREDEPLOY PPR or PROVISIONED as needed
       pointInTimeRecovery: true, // EDITBEFOREDEPLOY Enable backup (Point-in-Time Recovery)
+      encryption: dynamodb.TableEncryption.AWS_MANAGED // EDITBEFOREDEPLOY 
     });
 
     const createRowRequestTemplate = {
@@ -45,6 +41,7 @@ class ApigwDynamoDBStack extends cdk.Stack {
       },
       existingTableObj: dynamoTable,
       createRequestTemplate: JSON.stringify(createRowRequestTemplate),
+      createIntegrationResponses: createIntegrationResponseStructure,
       allowCreateOperation: true, // EDITBEFOREDEPLOY Allow create entry
       allowReadOperation: false, // EDITBEFOREDEPLOY Disallow read entry via ApiGateway
     };
@@ -59,9 +56,9 @@ const props = {
   env: {
     account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION,
-  }
+  },
 }
-const responseTemplate = {}; // EDITBEFOREDEPLOY agigw response as needed
+
 const createRowRequestItemTemplate = { // EDITBEFOREDEPLOY update form input template as needed
   "formSourceId": {
     "S": "$input.path('$.sourceAndPath')"
@@ -85,7 +82,14 @@ const createRowRequestItemTemplate = { // EDITBEFOREDEPLOY update form input tem
     "S": "$input.path('$.message')"
   }
 }
-const usagePlanDetails = {
+
+/**
+ * EDITBEFOREDEPLOY 
+ * for usagePlanDetails to apply automatically, edit the file at: \node_modules\@aws-solutions-constructs\core\lib\apigateway-helper.js 
+ * in the function configureRestApi, add to 'const usagePlanProps' the usagePlanDetails above
+ * otherwise you can do this manually via the AWS console
+ */
+const usagePlanDetailsEXAMPLE = {
   throttle: {
     rateLimit: 10,
     burstLimit: 2
@@ -95,12 +99,23 @@ const usagePlanDetails = {
     period: apigateway.Period.MONTH
   }
 };
-/**
- * EDITBEFOREDEPLOY 
- * for usagePlanDetails to apply automatically, edit the file at: \node_modules\@aws-solutions-constructs\core\lib\apigateway-helper.js 
- * in the function configureRestApi, add to 'const usagePlanProps' the usagePlanDetails above
- * otherwise you can do this manually via the AWS console
- */
+
+const createIntegrationResponseStructure = [ // EDITBEFOREDEPLOY
+  {
+    statusCode: "200",
+    responseTemplates: {
+      "application/json": JSON.stringify({
+        message: "Success: Entry created successfully.", 
+        // You can add more response data here if needed
+      })
+    },
+    responseParameters: {
+      "method.response.header.Content-Type": "'application/json'",
+      // You can add more response headers here if needed
+    }
+  }
+];
+
 console.log("deploying to:", { env: props.env });
-new ApigwDynamoDBStack(app, 'ApigwDynamoDBStack', props, createRowRequestItemTemplate);
+new ApigwDynamoDBStack(app, 'ApigwDynamoDBStack', props, createRowRequestItemTemplate, createIntegrationResponseStructure);
 app.synth();

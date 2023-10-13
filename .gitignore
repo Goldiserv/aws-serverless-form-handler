@@ -9,6 +9,6 @@ node_modules
 cdk.out
 *.iml
 
-run-helpers/
+deploy-helpers/
 examples/
 check-submissions.bat
