@@ -1,0 +1,25 @@
+{
+  "name": "aws-serverless-form-handler",
+  "version": "1.0.0",
+  "repository": "https://github.com/Goldiserv/aws-serverless-form-handler.git",
+  "author": "Goldiserv",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-solutions-constructs/core": "^2.44.0",
+    "@types/node": "^20.8.4",
+    "aws-cdk-lib": "^2.100.0",
+    "aws-sdk": "^2.1472.0",
+    "constructs": "^10.3.0",
+    "dotenv": "^16.3.1",
+    "path": "^0.12.7"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "bat": "cdk"
+  },
+  "devDependencies": {
+    "axios": "^1.5.1"
+  }
+}
