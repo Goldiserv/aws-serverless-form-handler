@@ -8,9 +8,14 @@ It is designed for users who want to self-host form submission data.
 - API calls are secured behind an api key
 - Ability to add throttling and quotas
 - Out of the box input validation
-- In control of your own data
-- Encrption enabled by default
+- In control of your own data and data sovereignty 
+- Encryption enabled by default
 - Deploy and test with ease
+- Default DynamoDB sort key prioritises filtering by date
+
+## Roadmap 🎯
+
+- Email notitifcations on submissions via SES
 
 ## Setup ⚙️
 
@@ -30,7 +35,10 @@ It is designed for users who want to self-host form submission data.
 1. Edit the .env file to update the deployment account and region
 1. Search for 'EDITBEFOREDEPLOY' in index.ts and make adjustments as needed
 1. run "yarn build" or "yarn watch" to transpile .ts file to .js
-1. run cdk deploy
+1. run "cdk deploy"
+1. to add ApiGatway response CORS headers, there seems to be an issue with the CDK as it's missing the ability to add headers via CDK. Instead, manually enable CORS on the API post endpoint.
+    - See issue desciption https://github.com/aws/aws-cdk/issues/15493. 
+    - Adding CORS via console: https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-cors-console.html
 
 ## Testing 🧪
 
@@ -55,4 +63,4 @@ MIT License.
 
 ## Author ✍️
 
-Peter Shi [LinkedIn](https://www.linkedin.com/in/petershicloud/)
+Peter Shi ([LinkedIn](https://www.linkedin.com/in/petershicloud/))
